@@ -10,8 +10,9 @@ if (Meteor.isClient) {
 
   Template.hello.events({
     'click button': function () {
-      // increment the counter when button is clicked
-      Session.set("counter", Session.get("counter") + 1);
+      Meteor.call('getUserStars', 'albertcui', function (error, result) { 
+        console.log(result) 
+      });
     }
   });
 }
@@ -19,5 +20,12 @@ if (Meteor.isClient) {
 if (Meteor.isServer) {
   Meteor.startup(function () {
     // code to run on server at startup
+  });
+  
+  Meteor.methods({
+      getUserStars: function (user) {
+        check(user, String);
+        Meteor.http.call("GET", "https://api.github.com/users/" + user + "/starred");
+      }
   });
 }
