@@ -10,5 +10,13 @@
 
 <template name="hello">
   <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+  <ol>
+  {{#each repos }}
+    <li>{{ full_name }}
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  {{/each}}
+  </ol>
 </template>

@@ -3,15 +3,19 @@ if (Meteor.isClient) {
   Session.setDefault("counter", 0);
 
   Template.hello.helpers({
-    counter: function () {
-      return Session.get("counter");
+    repos: function () {
+      return Session.get("repos");
     }
   });
 
   Template.hello.events({
     'click button': function () {
       Meteor.call('getUserStars', 'albertcui', function (error, result) { 
-        console.log(result) 
+        if (result.statusCode == 200) {
+          Session.set("repos", result.data)    
+        }
+      
+        console.log(result)
       });
     }
   });
@@ -25,7 +29,14 @@ if (Meteor.isServer) {
   Meteor.methods({
       getUserStars: function (user) {
         check(user, String);
-        Meteor.http.call("GET", "https://api.github.com/users/" + user + "/starred");
+        return Meteor.http.get(
+          "https://api.github.com/users/" + user + "/starred",
+          {
+            headers: {
+              "User-Agent": "albertcui" 
+            }
+          }
+        );
       }
   });
 }
