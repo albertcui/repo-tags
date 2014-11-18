@@ -14,7 +14,13 @@
   {{#each repos }}
     <li>{{ full_name }}
       <ul>
-        <li><a href="{{ html_url }}">{{ description }}</a></li>
+        <li><a href="{{ html_url }}">
+          {{#if description }}
+            {{ description }}
+          {{else}}
+            Link to repo
+          {{/if}}
+          </a></li>
       </ul>
     </li>
   {{/each}}
