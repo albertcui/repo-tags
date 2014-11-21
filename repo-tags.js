@@ -1,3 +1,5 @@
+Repos = new Mongo.Collection("repos");
+
 if (Meteor.isClient) {
   // counter starts at 0
   Session.setDefault("counter", 0);
@@ -29,7 +31,7 @@ if (Meteor.isServer) {
   Meteor.methods({
       getUserStars: function (user) {
         check(user, String);
-        return Meteor.http.get(
+        repos =  Meteor.http.get(
           "https://api.github.com/users/" + user + "/starred",
           {
             headers: {
@@ -37,6 +39,12 @@ if (Meteor.isServer) {
             }
           }
         );
+        
+        repos.data.forEach(function(r){
+          Repos.insert(r);
+        })
+        
+        return repos;
       }
   });
 }
