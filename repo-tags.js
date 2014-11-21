@@ -1,3 +1,4 @@
+
 Repos = new Mongo.Collection("repos");
 
 if (Meteor.isClient) {
@@ -41,7 +42,14 @@ if (Meteor.isServer) {
         );
         
         repos.data.forEach(function(r){
-          Repos.insert(r);
+          Repos.upsert(
+            {
+              'id': r.id
+            },
+            {
+              $set: r
+            }
+          );
         })
         
         return repos;
