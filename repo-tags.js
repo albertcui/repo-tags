@@ -33,7 +33,7 @@ if (Meteor.isServer) {
       getUserStars: function (user) {
         check(user, String);
         repos =  Meteor.http.get(
-          "https://api.github.com/users/" + user + "/starred",
+          "https://api.github.com/users/" + user + "/starred?per_page=100",
           {
             headers: {
               "User-Agent": "albertcui" 
