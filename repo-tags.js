@@ -25,26 +25,38 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  var github = Meteor.npmRequire('octonode');
+  var GitHubApi = Meteor.npmRequire('github');
       
-  var client = github.client();
+  var gh = new GitHubApi({version: "3.0.0"});
   
   Meteor.methods({
       getUserStars: function (user) {
         check(user, String);
         
-        var ghUser = client.user(user);
-        
-        
         var starred = Async.runSync(function(done){
-          ghUser.starred(function(err, status, body, headers){
-            done(null, body);
+          gh.repos.getStarredFromUser(
+            {
+              user: user,
+              per_page: 100
+            }, function(err, res) {
+              if (err) data(err, null)
+              getMore(res, res);
+              
+              function getMore(data, response) {
+                var link = response.meta.link;
+                if (gh.hasNextPage(link)) {
+                  gh.getNextPage(link, function(err, res){
+                    if (err) done(err, data);
+                    getMore(data.concat(res), res);
+                  })
+                } else {
+                  done(err, data)      
+                }
+              }
           })
         })
         
-        
-        
-        console.log(starred.result)
+        console.log(starred.result.length)
         // repos.data.forEach(function(r){
         //   Repos.upsert(
         //     {
