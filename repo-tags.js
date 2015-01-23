@@ -17,7 +17,7 @@ if (Meteor.isClient) {
         if (result.statusCode == 200) {
           Session.set("repos", result.data)    
         }
-      
+        
         console.log(result)
       });
     }
@@ -25,34 +25,38 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  Meteor.startup(function () {
-    // code to run on server at startup
-  });
+  var github = Meteor.npmRequire('octonode');
+      
+  var client = github.client();
   
   Meteor.methods({
       getUserStars: function (user) {
         check(user, String);
-        repos =  Meteor.http.get(
-          "https://api.github.com/users/" + user + "/starred?per_page=100",
-          {
-            headers: {
-              "User-Agent": "albertcui" 
-            }
-          }
-        );
         
-        repos.data.forEach(function(r){
-          Repos.upsert(
-            {
-              'id': r.id
-            },
-            {
-              $set: r
-            }
-          );
+        var ghUser = client.user(user);
+        
+        
+        var starred = Async.runSync(function(done){
+          ghUser.starred(function(err, status, body, headers){
+            done(null, body);
+          })
         })
         
-        return repos;
+        
+        
+        console.log(starred.result)
+        // repos.data.forEach(function(r){
+        //   Repos.upsert(
+        //     {
+        //       'id': r.id
+        //     },
+        //     {
+        //       $set: r
+        //     }
+        //   );
+        // })
+        
+        // return repos;
       }
   });
 }

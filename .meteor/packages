@@ -7,4 +7,8 @@ meteor-platform
 autopublish
 insecure
 http
+meteorhacks:npm
 
+
+
+npm-container
