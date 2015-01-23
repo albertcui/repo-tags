@@ -14,11 +14,9 @@ if (Meteor.isClient) {
   Template.hello.events({
     'click button': function () {
       Meteor.call('getUserStars', 'albertcui', function (error, result) { 
-        if (result.statusCode == 200) {
-          Session.set("repos", result.data)    
+        if (!error && !result.error) {
+          Session.set("repos", result.result)    
         }
-        
-        console.log(result)
       });
     }
   });
@@ -40,35 +38,37 @@ if (Meteor.isServer) {
               per_page: 100
             }, function(err, res) {
               if (err) data(err, null)
-              getMore(res, res);
+              getMore([], res);
               
               function getMore(data, response) {
                 var link = response.meta.link;
+              
                 if (gh.hasNextPage(link)) {
                   gh.getNextPage(link, function(err, res){
                     if (err) done(err, data);
-                    getMore(data.concat(res), res);
+                    getMore(data.concat(response), res);
                   })
                 } else {
-                  done(err, data)      
+                  done(err, data.concat(response))      
                 }
               }
           })
         })
         
-        console.log(starred.result.length)
-        // repos.data.forEach(function(r){
-        //   Repos.upsert(
-        //     {
-        //       'id': r.id
-        //     },
-        //     {
-        //       $set: r
-        //     }
-        //   );
-        // })
+        if (starred.error) return starred;
+  
+        starred.result.forEach(function(r){
+          Repos.upsert(
+            {
+              'id': r.id
+            },
+            {
+              $set: r
+            }
+          );
+        });
         
-        // return repos;
+        return starred;
       }
   });
 }
